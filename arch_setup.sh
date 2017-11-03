@@ -35,7 +35,7 @@ cat > /etc/pacman.d/mirrorlist <<-`EOM05594313219813`
 	Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch
 	Server = http://mirrors.advancedhosters.com/archlinux/$repo/os/$arch
 	Server = http://mirror.math.princeton.edu/pub/archlinux/$repo/os/$arch
-EOM05594313219813
+`EOM05594313219813`
 
 # Do an update to make sure all is, well, updated!
 pacman -Syu
