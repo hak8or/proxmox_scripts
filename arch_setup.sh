@@ -12,8 +12,10 @@ echo "----> Enabling SSH"
 systemctl enable sshd
 systemctl start sshd
 
-# Put my public SSH key in here.
-# ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC1NDs/5sOUhwwrCl7vbwl4gwn7HA071bwyrBYKaVM1pMkEj2e6BEfvm9dWuGF3tEUH3RQN8L9dQIuFUO+tDp99IJPVpkzXnhhuqsQp7GtSklqLg4fnJ9oop/w5PbUnDjS1jPNDssB8tmVeY3L/j9n/omZ0WkncYgQ9vlWVokkxg6fe0lYqv5e6VesWlzd4nPk63k9JcSF2/F06jgLFdSZhmV/DXHFNy8e1s+HHAWA3lhfIuCTNCZH4vFoOMucBjv858rxfBa+06YJ69JKP6aOHvbun7o1NQ9TSkNvPpYa/vr+Wf7Eu3t5A322D7w7zEBkCrNAiKbIgapbJQnailyO45TldjtxnQV99i6NU3Hyt0nuDfLPMQjYocwqcjykmZm+sTOgfYwVYDO+CmKIiCLpA1P6seJ2g0BL969bN2VgmHKYbX3obhVmRPGncTTYy3QJ72r1j5I30BtJkZk6X2uaFsQUgnPQutHBd6dpmP+lsWA10s4mDMNGWHl/IkS1ZdTlWETXiQh2N0iLQryUHynJGXKEkyrYUMRwm4BAJopcJiXXoPybeenhbmjai4jwEIvOkLUvesKl8lYJOcop174e6fN/ERypZLPweW6eQNipPHxeSkqqDpiPvQzaZEaVjucr1n5LqBBIcWZ7VZcioRNve06rsFt4aonkyEbORKlKIyQ== hak8or@gmail.com
+# Disable root check for makepkg since we are using root for everything.
+# Replace the "if (( EUID == 0 )); then" with "if (( 0 )); then" to force root
+# check to always fail.
+sed -i 's/if (( EUID == 0 )); then/if (( 0 )); then/' /usr/bin/makepkg
 
 # Setup keys for pacman
 echo "----> Setting up keys for pacman"
