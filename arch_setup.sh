@@ -60,16 +60,20 @@ cd ~/tmp
 # ----------- package query for yaourt -----------
 git clone https://aur.archlinux.org/package-query.git
 cd package-query
-makepkg -si
+makepkg -si --noconfirm
 cd ..
 # ----------- yaourt itself -----------
 git clone https://aur.archlinux.org/yaourt.git
 cd yaourt
-makepkg -si
+makepkg -si --noconfirm
 cd ..
+# Wipe tmp dir
 cd ..
 rm -r -f ~/tmp
 
-# And say what the IP address is to the terminal.
-cowsay "All Done!IP Address information: $(ip addr show)"
+# Get the ip addresses using some grep and awk magic.
+ipv6addr=$(ip -6 addr show eth0 | grep /128 | grep -v fd75 | awk '{a=$2; split(a, b, "/"); print b[1]}')
+ipv4addr=$(ip -4 addr show eth0 | grep inet | awk '{a=$2; split(a, b, "/"); print b[1]}')
 
+# And say what the IP address is to the terminal.
+cowsay "All Done! $ipv4addr $ipv6addr"
