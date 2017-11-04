@@ -37,13 +37,9 @@ cat > /etc/pacman.d/mirrorlist <<-`EOM05594313219813`
 	Server = http://mirror.math.princeton.edu/pub/archlinux/$repo/os/$arch
 `EOM05594313219813`
 
-# Do an update to make sure all is, well, updated!
-echo "----> Updating"
-pacman -Syu --noconfirm
-
-# Install git and base-devel which includes gcc and jazz.
-echo "----> Installing base-devel, git, htop, vim, and cowsay"
-pacman -S base-devel git htop vim cowsay --noconfirm
+# Do an update and install some packages.
+echo "----> Updating and installing base-devel, git, htop, vim, and cowsay"
+pacman -Syu base-devel git htop vim cowsay --noconfirm
 
 # Disable root check for makepkg since we are using root for everything.
 # Replace the "if (( EUID == 0 )); then" with "if (( 0 )); then" to force root
