@@ -1,7 +1,4 @@
-#!/usr/bin/bash
-
-# To run this script, do the following:
-
+#!/usr/bin/env bash
 
 # For making the script stop if something fails like make.
 set -e 
@@ -68,6 +65,7 @@ cd ..
 rm -r -f ~/tmp
 
 # Get the ip addresses using some grep and awk magic.
+# Magic inspired by this: https://superuser.com/questions/468727/how-to-get-the-ipv6-ip-address-of-linux-machine
 ipv6addr=$(ip -6 addr show eth0 | grep /128 | grep -v fd75 | awk '{a=$2; split(a, b, "/"); print b[1]}')
 ipv4addr=$(ip -4 addr show eth0 | grep inet | awk '{a=$2; split(a, b, "/"); print b[1]}')
 
