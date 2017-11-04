@@ -12,11 +12,6 @@ echo "----> Enabling SSH"
 systemctl enable sshd
 systemctl start sshd
 
-# Disable root check for makepkg since we are using root for everything.
-# Replace the "if (( EUID == 0 )); then" with "if (( 0 )); then" to force root
-# check to always fail.
-sed -i 's/if (( EUID == 0 )); then/if (( 0 )); then/' /usr/bin/makepkg
-
 # Setup keys for pacman
 echo "----> Setting up keys for pacman"
 pacman-key --init
@@ -47,8 +42,13 @@ echo "----> Updating"
 pacman -Syu --noconfirm
 
 # Install git and base-devel which includes gcc and jazz.
-echo "----> Installing base-devel and git"
-pacman -S base-devel git --noconfirm
+echo "----> Installing base-devel, git, htop, vim, and cowsay"
+pacman -S base-devel git htop vim cowsay --noconfirm
+
+# Disable root check for makepkg since we are using root for everything.
+# Replace the "if (( EUID == 0 )); then" with "if (( 0 )); then" to force root
+# check to always fail.
+sed -i 's/if (( EUID == 0 )); then/if (( 0 )); then/' /usr/bin/makepkg
 
 # Install Yaourt. Why yaourt instead of pacaur? Because pacaur doesn't allow
 # itself to be ran as root, even though all we have is root in the container,
@@ -69,10 +69,6 @@ makepkg -si
 cd ..
 cd ..
 rm -r -f ~/tmp
-
-# Install htop and cowsay cause they are awesome
-echo "----> Installing htop and cowsay"
-yaourt -S htop cowsay --noconfirm
 
 # And say what the IP address is to the terminal.
 cowsay "All Done!IP Address information: $(ip addr show)"
