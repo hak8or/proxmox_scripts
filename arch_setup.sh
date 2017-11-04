@@ -38,10 +38,10 @@ cat > /etc/pacman.d/mirrorlist <<-`EOM05594313219813`
 `EOM05594313219813`
 
 # Do an update to make sure all is, well, updated!
-pacman -Syu
+pacman -Syu --noconfirm
 
-# Install base-devel which includes gcc and jazz.
-pacman -S base-devel
+# Install git and base-devel which includes gcc and jazz.
+pacman -S base-devel git --noconfirm
 
 # Create temp dirs for installing stuff
 mkdir ~/tmp
@@ -62,6 +62,9 @@ git clone https://aur.archlinux.org/yaourt.git
 cd yaourt
 makepkg -si
 cd ..
+
+cd ..
+rm -r -f ~/tmp
 
 # Install htop and cowsay cause they are awesome
 yaourt -S htop cowsay
