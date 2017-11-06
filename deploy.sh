@@ -57,8 +57,42 @@ if [[ $1 == "-ID" ]]; then
     fi
 fi
 
+# Make sure SSH public key is in proxmox host. This overwrites if it exists.
+scp $HOME/.ssh/id_rsa.pub root@$PROXMOX_IP_ADDR:/tmp/id_rsa.pub > /dev/null
+
 # No specific container was provided, so we create one.
 # Can pass small script like this: https://stackoverflow.com/a/3872762/516959
-ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030CAlfad6'
-    echo "Hello world! :D"
+VMID=$(ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030CAlfad6'
+    # use the highest VMID+1 as our new VMID. This returns 1 if no VMID's exist.
+    VMID=$(pct list | awk 'NR > 1 {print $1}' | sort -nr | head -n1)
+    VMID=$(($VMID + 1))
+
+    # VMID's less than 100 are for internal proxmox use, make sure we are >= 100.
+    # This also could mean there were no proxmox boxes created.
+    if [[ $VMID -lt 100 ]]; then
+        VMID=100
+    fi
+
+    # Create a new container with the VMID
+    pct create $VMID /var/lib/vz/template/cache/archlinux-base_20170704-1_amd64.tar.gz -ssh-public-keys /tmp/id_rsa.pub -storage local-zfs -net0 name=eth0,bridge=vmbr0,ip=dhcp,ip6=dhcp -ostype archlinux > /dev/null
+
+    # Start the container.
+    pct start $VMID > /dev/null
+
+    # And say all went well.
+    echo "$VMID"
 AcRP030CAlfad6
+)
+echo "Completed Container Init, ID: $VMID"
+
+# Send our default arch init script over to proxmox host. This overwrites any old file.
+scp arch_setup.sh root@$PROXMOX_IP_ADDR:/tmp/arch_setup.sh > /dev/null
+
+# Copy the script into the container and run it.
+ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<- AcRP030CAlfad6
+    pct push $VMID /tmp/arch_setup.sh /tmp/arch_setup.sh > /dev/null
+    pct exec $VMID chmod +x /tmp/arch_setup.sh
+    pct exec $VMID /tmp/arch_setup.sh
+AcRP030CAlfad6
+
+echo "Deploy.sh Complete!"
