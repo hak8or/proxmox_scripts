@@ -19,9 +19,12 @@ elif [[ $DEPTH == 3 ]]; then
 fi
 echo "$TAGSTR ====== $TITLE (Logged to $LOGFILE) ======"
 
-# All we need to do is install gogs. Gogs configuration must be done via command line.
+# All we need to do is install gogs and enable it. 
+# Gogs configuration must be done via command line.
 echo "$TAGSTR Installing Gogs"
-yaourt -S gogs > $LOGFILE 2>&1
+yaourt -S gogs --noconfirm > $LOGFILE 2>&1
+systemctl enable gogs > $LOGFILE 2>&1
+systemctl start gogs > $LOGFILE 2>&1
 
 # Lastly, say we are done.
 echo "$TAGSTR Completed $TITLE"
