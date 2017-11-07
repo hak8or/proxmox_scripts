@@ -2,6 +2,7 @@
 
 ##########################
 # Deploy script used for initilizing an Arch based container on Proxmox
+# You should have cowsay installed because it's awesome!
 ##########################
 
 # Header for this script
@@ -35,11 +36,11 @@ fi
 # Retrieve the IP address of a container as IPv4,IPv6
 FN_get_IPaddr (){
     # IPv6 address fetch
-    IPv6ADDR=$(ssh root@$PROXMOX_IP_ADDR $"pct exec 101 ip addr show eth0 | grep /128 | grep -v fd75")
+    IPv6ADDR=$(ssh root@$PROXMOX_IP_ADDR "pct exec $1 ip addr show eth0 | grep /128 | grep -v fd75")
     IPv6ADDR=$(echo $IPv6ADDR | awk '{a=$2; split(a, b, "/"); print b[1]}')
 
     # IPv4 address fetch
-    IPv4ADDR=$(ssh root@$PROXMOX_IP_ADDR $"pct exec 101 ip addr show eth0 | grep inet")
+    IPv4ADDR=$(ssh root@$PROXMOX_IP_ADDR "pct exec $1 ip addr show eth0 | grep inet")
     IPv4ADDR=$(echo $IPv4ADDR | awk '{a=$2; split(a, b, "/"); print b[1]}')
 }
 
@@ -66,6 +67,7 @@ if [[ $1 == "-ID" ]]; then
     if [[ -z $3 ]]; then
         # No script found, just return the ip address.
         FN_get_IPaddr $2
+        echo "$IPv4ADDR, $IPv6ADDR"
         exit
     else
         # A script was found, verify it exists.
@@ -126,5 +128,5 @@ fi
 
 # Lastly, say we are done and what the IP address is to the terminal.
 echo "$TAGSTR Completed $TITLE"
-FN_get_IPaddr $2
+FN_get_IPaddr $VMID
 cowsay "Arch setup all done! VMID: $VMID, IPv4: $IPv4ADDR, IPv6: $IPv6ADDR"
