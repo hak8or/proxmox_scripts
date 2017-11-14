@@ -4,7 +4,7 @@ My collections of various scripts related to proxmox. These can be used to creat
 
 ## Deploy Script
 
-A small wrapper which generates an Arch Linux based container (by default) and then runs a optional script. Also can provide the IP address of a container created using the Arch setup script. 
+A small wrapper which generates an Arch Linux based container (by default) and then runs a optional script. Also can provide the IP address of a container created using the Arch setup script.
 
 Note you must update the ```PROXMOX_IP_ADDR``` variable at the top of the script so the script knows where to SSH to. Also, this is intentionally configured such that the proxmox login is via ssh-key only. If you need to setup the SSH keys, instructions can be found [here](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2).
 
@@ -14,6 +14,10 @@ deploy.sh # Outputs a container ID when complete.
 
 # Create an Arch Linux based container which then runs a script to init gogs.
 deploy.sh gogs.sh # Outputs a container ID when complete.
+
+# Create a snapshot of a container and then restore to said snapshot.
+deploy.sh -ID 101 -snapshot foo # Snapshot called foo was created.
+deploy.sh -ID 101 -snapshot foo # Rolling back to snapshot foo.
 
 # Just run a script to init gogs on an already existing container.
 deploy.sh -ID 101 gogs.sh  # Returns nothing.

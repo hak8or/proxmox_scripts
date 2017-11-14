@@ -98,6 +98,33 @@ if [[ $1 == "-ID" ]]; then
     # Get the machines IPv4 and IPv6 address.
     FN_get_IPaddr $2
 
+    # Check if this is a snapshot operation
+    if [[ $3 == "-snapshot" ]]; then
+        # If no snapshot name given, abort.
+        if [[ -z $4 ]]; then
+            echo "$TAGSTR No snapshot name given!"
+            exit
+        fi
+
+        # Check if the snapshot exists on proxmox for this VMID.
+        SNAPSHOT_LIST=$(ssh root@$PROXMOX_IP_ADDR "pct listsnapshot $2")
+        SNAPSHOT_LIST=$(echo "$SNAPSHOT_LIST" | awk '{print $1}' | grep $4)
+        if [[ -z $SNAPSHOT_LIST ]]; then
+            # Create a snapshot with this name.
+            echo "$TAGSTR Creating a snapshot called $4 for VMID $2!"
+            ssh root@$PROXMOX_IP_ADDR "pct snapshot $2 $4"
+        else
+            # Restore to the snapshot
+            echo "$TAGSTR Rollbacking VMID $2 to snapshot $4!"
+            ssh root@$PROXMOX_IP_ADDR "pct rollback $2 $4"
+
+            echo "$TAGSTR Starting VMID $2!"
+            ssh root@$PROXMOX_IP_ADDR "pct start $2"
+        fi
+        echo "$TAGSTR $IPv4ADDR, $IPv6ADDR"
+        exit
+    fi
+
     # Check if a script/dir was provided.
     if [[ -z $3 ]]; then
         # No script found, just return the ip address.
@@ -106,7 +133,7 @@ if [[ $1 == "-ID" ]]; then
     else
         # A script/dir was found, verify it exists.
         if [[ -e $3 ]]; then
-            FN_copyandorexec $3
+            FN_copyandorexec $3 $IPv6ADDR
             echo "$TAGSTR $IPv4ADDR, $IPv6ADDR"
             exit
         else
