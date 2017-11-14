@@ -33,7 +33,7 @@ if [[ $REPLYFROMSERVER != "Hello World" ]]; then
     exit
 fi
 
-# Retrieve the IP address of a container as IPv4,IPv6
+# Retrieve the IP address of a container as IPv4,IPv6. Arg1 is the container ID.
 FN_get_IPaddr (){
     # IPv6 address fetch
     IPv6ADDR=$(ssh root@$PROXMOX_IP_ADDR "pct exec $1 ip addr show eth0 | grep /128 | grep -v fd75")
@@ -45,7 +45,14 @@ FN_get_IPaddr (){
 }
 
 # Run a script on the the proxmox container. Arg 1 is container ID, arg 2 is script file.
-FN_exec_script_container(){
+# 
+# This uses the proxmox host as a proxy, meaning it writes the script into the host, and
+# then copies from proxmox to the guest, and executes on the guest. Only useful when you
+# can't copy to script directly to the guest, like when ssh isn't running yet.
+#
+# Run script over SSH instead of using this when possible. For example:
+# ssh root@$IPv6ADDR 'bash -s' < somescript.sh
+FN_exec_script_proxy_container(){
     scp $2 root@$PROXMOX_IP_ADDR:/tmp/$2 > /dev/null
 
     ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<- AcRP030Cclfad6
@@ -63,18 +70,19 @@ if [[ $1 == "-ID" ]]; then
         exit
     fi
 
+    # Get the machines IPv4 and IPv6 address.
+    FN_get_IPaddr $2
+
     # Check if a script was provided.
     if [[ -z $3 ]]; then
         # No script found, just return the ip address.
-        FN_get_IPaddr $2
         echo "$IPv4ADDR, $IPv6ADDR"
         exit
     else
         # A script was found, verify it exists.
         if [[ -e $3 ]]; then
-            FN_exec_script_container $2 $3
-
-            FN_get_IPaddr $2
+            echo "running script!"
+            ssh root@$IPv6ADDR 'bash -s' < $3
             echo "$TAGSTR $IPv4ADDR, $IPv6ADDR"
             exit
         else
@@ -112,14 +120,17 @@ VMID=$(ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030CAlfad6'
 AcRP030CAlfad6
 )
 
+# Get the IPv4 and IPv6 addresses of our noew container.
+FN_get_IPaddr $VMID
+
 # Send and execute our arch init script.
-FN_exec_script_container $VMID arch_setup.sh
+FN_exec_script_proxy_container $VMID arch_setup.sh
 
 # Run any potential secondary script.
 if [[ -n $1 ]]; then
     # A script was found, verify it exists.
     if [[ -e $1 ]]; then
-        FN_exec_script_container $VMID $1
+        ssh root@$IPv6ADDR 'bash -s' < $1
     else
         echo "$TAGSTR Bash script $1 was not found."
         exit
