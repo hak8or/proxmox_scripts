@@ -1,0 +1,13 @@
+[Unit]
+Description=Example Ruby website
+Requires=network.target
+
+[Service]
+Type=simple
+User=website
+Group=website
+WorkingDirectory=/var/www
+ExecStart=/usr/bin/bash -lc 'bundle exec rackup -s puma -p 9463 -o [::]'
+
+[Install]
+WantedBy=multi-user.target

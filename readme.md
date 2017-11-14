@@ -13,14 +13,17 @@ Note you must update the ```PROXMOX_IP_ADDR``` variable at the top of the script
 deploy.sh # Outputs a container ID when complete.
 
 # Create an Arch Linux based container which then runs a script to init gogs.
-deploy.sh gogs.sh # Outputs a container ID when complete.
+deploy.sh gogs.sh
 
 # Create a snapshot of a container and then restore to said snapshot.
 deploy.sh -ID 101 -snapshot foo # Snapshot called foo was created.
 deploy.sh -ID 101 -snapshot foo # Rolling back to snapshot foo.
 
 # Just run a script to init gogs on an already existing container.
-deploy.sh -ID 101 gogs.sh  # Returns nothing.
+deploy.sh -ID 101 gogs.sh
+
+# Copy the contents of a directory and run {directory}/{directory.sh}
+deploy.sh -ID 101 ruby_server
 
 # Get a comma seperated IPv4 and IPv6 address of a container.
 deploy.sh -ID 101 # Outputs an IPv4 and IPv6 address seperated by a comma.
