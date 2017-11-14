@@ -62,6 +62,31 @@ FN_exec_script_proxy_container(){
 AcRP030Cclfad6
 }
 
+# Runs a single script or copies the contents of a directory and executes a script that has
+# the same name as the directory but with the .sh extension appended.
+#
+# Arg1 is the file name, Arg2 is the ip address.
+FN_copyandorexec(){
+    # Check if it's just a normal file (not directory).
+    if [[ -f $1 ]]; then
+        ssh root@$2 'bash -s' < $1
+    fi
+
+    # If it's a directory, copy the contents.
+    if [[ -d $1 ]]; then
+        # This may take a while, so let user know something is happening.
+        echo "$TAGSTR Copying contents of $1"
+
+        # Use Rsync in case it's many files.
+        # Flag -a: Archive (recursive, copy symbolic links, modification times, etc)
+        # Flag -z: Compress (use compression when sending)
+        rsync -az $1 root@[$2]:/tmp
+
+        # Execute the presumed script inside the directory.
+        ssh root@$2 "cd /tmp/$1; ./$1.sh"
+    fi
+}
+
 # Check if we are referring to a specific container.
 if [[ $1 == "-ID" ]]; then
     # Make sure we have a container ID
@@ -73,20 +98,19 @@ if [[ $1 == "-ID" ]]; then
     # Get the machines IPv4 and IPv6 address.
     FN_get_IPaddr $2
 
-    # Check if a script was provided.
+    # Check if a script/dir was provided.
     if [[ -z $3 ]]; then
         # No script found, just return the ip address.
         echo "$IPv4ADDR, $IPv6ADDR"
         exit
     else
-        # A script was found, verify it exists.
+        # A script/dir was found, verify it exists.
         if [[ -e $3 ]]; then
-            echo "running script!"
-            ssh root@$IPv6ADDR 'bash -s' < $3
+            FN_copyandorexec $3
             echo "$TAGSTR $IPv4ADDR, $IPv6ADDR"
             exit
         else
-            echo "$TAGSTR Bash script $3 was not found."
+            echo "$TAGSTR Directory or file $3 was not found."
             exit
         fi
     fi
@@ -130,9 +154,9 @@ FN_exec_script_proxy_container $VMID arch_setup.sh
 if [[ -n $1 ]]; then
     # A script was found, verify it exists.
     if [[ -e $1 ]]; then
-        ssh root@$IPv6ADDR 'bash -s' < $1
+        FN_copyandorexec $1 $IPv6ADDR
     else
-        echo "$TAGSTR Bash script $1 was not found."
+        echo "$TAGSTR Directory or file $1 was not found."
         exit
     fi
 fi
