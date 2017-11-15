@@ -162,7 +162,11 @@ VMID=$(ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030CAlfad6'
     fi
 
     # Create a new container with the VMID
-    pct create $VMID /var/lib/vz/template/cache/archlinux-base_20170704-1_amd64.tar.gz -ssh-public-keys /tmp/id_rsa.pub -storage local-zfs -net0 name=eth0,bridge=vmbr0,ip=dhcp,ip6=dhcp -ostype archlinux > /dev/null
+    # Use Below to create a new container template.
+    #   https://forum.proxmox.com/threads/customize-a-lxc-template.23461/
+    TEMPLATE=archlinux-base_20170704-1_amd64.tar.gz
+    #TEMPLATE=archlinux_bootstrapped_11-14-2017.tar.gz
+    pct create $VMID /var/lib/vz/template/cache/$TEMPLATE -ssh-public-keys /tmp/id_rsa.pub -storage local-zfs -net0 name=eth0,bridge=vmbr0,ip=dhcp,ip6=dhcp -ostype archlinux > /dev/null
 
     # Start the container.
     pct start $VMID > /dev/null
