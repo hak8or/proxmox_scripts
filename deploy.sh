@@ -191,5 +191,4 @@ fi
 
 # Lastly, say we are done and what the IP address is to the terminal.
 echo "$TAGSTR Completed $TITLE"
-FN_get_IPaddr $VMID
 cowsay "Arch setup all done! VMID: $VMID, IPv4: $IPv4ADDR, IPv6: $IPv6ADDR"
