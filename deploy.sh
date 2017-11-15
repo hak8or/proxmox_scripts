@@ -172,11 +172,14 @@ VMID=$(ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030CAlfad6'
 AcRP030CAlfad6
 )
 
+# Send and execute our arch init script.
+FN_exec_script_proxy_container $VMID arch_setup.sh
+
 # Get the IPv4 and IPv6 addresses of our noew container.
 FN_get_IPaddr $VMID
 
-# Send and execute our arch init script.
-FN_exec_script_proxy_container $VMID arch_setup.sh
+# Wipe the fingerprint of the host in case it was used earlier.
+ssh-keygen -R $IPv6ADDR > /dev/null
 
 # Run any potential secondary script.
 if [[ -n $1 ]]; then
