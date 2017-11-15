@@ -175,6 +175,9 @@ AcRP030CAlfad6
 # Send and execute our arch init script.
 FN_exec_script_proxy_container $VMID arch_setup.sh
 
+# Wait a bit for the vm to initilize fully.
+sleep 2
+
 # Get the IPv4 and IPv6 addresses of our noew container.
 FN_get_IPaddr $VMID
 
