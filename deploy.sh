@@ -80,7 +80,8 @@ FN_copyandorexec(){
         # Use Rsync in case it's many files.
         # Flag -a: Archive (recursive, copy symbolic links, modification times, etc)
         # Flag -z: Compress (use compression when sending)
-        rsync -az $1 root@[$2]:/tmp
+        # Flag -e: specifies remote shell to use (to disable fingerprint verification)
+        rsync -aze "ssh -q -o StrictHostKeyChecking=no" $1 root@[$2]:/tmp
 
         # Execute the presumed script inside the directory.
         ssh root@$2 "cd /tmp/$1; ./$1.sh"
