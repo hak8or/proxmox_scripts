@@ -68,22 +68,24 @@ sed -i 's/if (( EUID == 0 )); then/if (( 0 )); then/' /usr/bin/makepkg > $LOGFIL
 # itself to be ran as root, even though all we have is root in the container,
 # and I don't want to bother fiddling with users just for this. Yaourt on the
 # other hand works fine for this.
-echo "$TAGSTR Installing package-query and yaourt"
-mkdir ~/tmp
-cd ~/tmp
-# ----------- package query for yaourt -----------
-git clone https://aur.archlinux.org/package-query.git  > $LOGFILE 2>&1
-cd package-query
-makepkg -si --noconfirm  > $LOGFILE 2>&1
-cd ..
-# ----------- yaourt itself -----------
-git clone https://aur.archlinux.org/yaourt.git > $LOGFILE 2>&1
-cd yaourt
-makepkg -si --noconfirm > $LOGFILE 2>&1
-cd ..
-# Wipe tmp dir
-cd ..
-rm -r -f ~/tmp
+if ! type yaourt &> /dev/null; then
+	echo "$TAGSTR Installing package-query and yaourt"
+	mkdir ~/tmp
+	cd ~/tmp
+	# ----------- package query for yaourt -----------
+	git clone https://aur.archlinux.org/package-query.git  > $LOGFILE 2>&1
+	cd package-query
+	makepkg -si --noconfirm  > $LOGFILE 2>&1
+	cd ..
+	# ----------- yaourt itself -----------
+	git clone https://aur.archlinux.org/yaourt.git > $LOGFILE 2>&1
+	cd yaourt
+	makepkg -si --noconfirm > $LOGFILE 2>&1
+	cd ..
+	# Wipe tmp dir
+	cd ..
+	rm -r -f ~/tmp
+fi
 
 # Get the ip addresses using some grep and awk magic.
 # Magic inspired by this: https://superuser.com/questions/468727/how-to-get-the-ipv6-ip-address-of-linux-machine
