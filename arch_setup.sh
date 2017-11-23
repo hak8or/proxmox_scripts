@@ -55,20 +55,24 @@ cat <<- 'EOM05594313219813' > /etc/pacman.d/mirrorlist
 	Server = http://mirror.math.princeton.edu/pub/archlinux/$repo/os/$arch
 EOM05594313219813
 
-# Do an update and install some packages.
-echo "$TAGSTR Updating and installing base-devel, git, htop, vim, and cowsay"
-pacman -Syu base-devel git htop vim cowsay --noconfirm > $LOGFILE 2>&1
+# Update as needed.
+echo "$TAGSTR Updating all packages as needed"
+pacman -Syu --noconfirm > $LOGFILE 2>&1
 
-# Disable root check for makepkg since we are using root for everything.
-# Replace the "if (( EUID == 0 )); then" with "if (( 0 )); then" to force root
-# check to always fail.
-sed -i 's/if (( EUID == 0 )); then/if (( 0 )); then/' /usr/bin/makepkg > $LOGFILE 2>&1
+# Do an update and install some packages.
+echo "$TAGSTR Installing base-devel, git, htop, vim, rsync, and cowsay"
+pacman -Syu base-devel git htop vim cowsay rsync --noconfirm --needed > $LOGFILE 2>&1
 
 # Install Yaourt. Why yaourt instead of pacaur? Because pacaur doesn't allow
 # itself to be ran as root, even though all we have is root in the container,
 # and I don't want to bother fiddling with users just for this. Yaourt on the
 # other hand works fine for this.
 if ! type yaourt &> /dev/null; then
+	# Disable root check for makepkg since we are using root for everything.
+	# Replace the "if (( EUID == 0 )); then" with "if (( 0 )); then" to force root
+	# check to always fail.
+	sed -i 's/if (( EUID == 0 )); then/if (( 0 )); then/' /usr/bin/makepkg > $LOGFILE 2>&1
+
 	echo "$TAGSTR Installing package-query and yaourt"
 	mkdir ~/tmp
 	cd ~/tmp
