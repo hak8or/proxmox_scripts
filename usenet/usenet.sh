@@ -35,8 +35,6 @@ systemctl enable sabnzbd > $LOGFILE 2>&1
 # Install and config sonarr.
 echo "$TAGSTR Installing and configuring sonarr"
 yaourt -S libmediainfo mono sqlite sonarr --noconfirm --needed > $LOGFILE 2>&1
-mkdir /usr/lib/sonarr
-mkdir /var/lib/sonarr
 tar -xzf /tmp/usenet/NzbDrone.tar.gz -C /tmp/usenet/ > $LOGFILE 2>&1
 mv -f /tmp/usenet/NzbDrone/* /var/lib/sonarr
 chown -R sonarr:sonarr /usr/lib/sonarr
