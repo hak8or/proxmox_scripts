@@ -28,7 +28,7 @@ yaourt -S sabnzbd python2-pyopenssl --noconfirm --needed > $LOGFILE 2>&1
 cp /tmp/usenet/sabnzbd.ini /opt/sabnzbd/sabnzbd.ini
 
 # Start sanbznd up
-echo "$TAGSTR Starting sabnzb"
+echo "$TAGSTR Starting sabnzb (default port: 8085)"
 systemctl start sabnzbd
 systemctl enable sabnzbd
 
@@ -43,7 +43,7 @@ chown -R sonarr:sonarr /usr/lib/sonarr
 chown -R sonarr:sonarr /var/lib/sonarr
 
 # Start up Sonarr.
-echo "$TAGSTR Starting sonarr"
+echo "$TAGSTR Starting sonarr (default port: 8989)"
 systemctl start sonarr
 systemctl enable sonarr
 
@@ -52,7 +52,7 @@ echo "$TAGSTR Installing and configuring radarr"
 yaourt -S radarr --noconfirm --needed > $LOGFILE 2>&1
 
 # Start up radarr.
-echo "$TAGSTR Starting radarr"
+echo "$TAGSTR Starting radarr (default port: 7878)"
 systemctl start radarr
 systemctl enable radarr
 
