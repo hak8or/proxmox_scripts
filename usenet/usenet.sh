@@ -30,7 +30,7 @@ cp /tmp/usenet/sabnzbd.ini /opt/sabnzbd/sabnzbd.ini
 # Start sanbznd up
 echo "$TAGSTR Starting sabnzb (default port: 8085)"
 systemctl start sabnzbd
-systemctl enable sabnzbd
+systemctl enable sabnzbd > $LOGFILE 2>&1
 
 # Install and config sonarr.
 echo "$TAGSTR Installing and configuring sonarr"
@@ -45,7 +45,7 @@ chown -R sonarr:sonarr /var/lib/sonarr
 # Start up Sonarr.
 echo "$TAGSTR Starting sonarr (default port: 8989)"
 systemctl start sonarr
-systemctl enable sonarr
+systemctl enable sonarr > $LOGFILE 2>&1
 
 # Install Radarr
 echo "$TAGSTR Installing and configuring radarr"
@@ -54,7 +54,7 @@ yaourt -S radarr --noconfirm --needed > $LOGFILE 2>&1
 # Start up radarr.
 echo "$TAGSTR Starting radarr (default port: 7878)"
 systemctl start radarr
-systemctl enable radarr
+systemctl enable radarr > $LOGFILE 2>&1
 
 # Lastly, say we are done.
 echo "$TAGSTR Completed $TITLE"
