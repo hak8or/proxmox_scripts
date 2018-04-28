@@ -163,9 +163,21 @@ VMID=$(ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030C
     fi
 
     # Create a new container with the VMID
-    # Use Below to create a new container template.
+    # Use Below to create a new container template. Can also right click in proxmox GUI
+    # but that does not handle clearing pacman cache, etc.
     #   https://forum.proxmox.com/threads/customize-a-lxc-template.23461/
-    TEMPLATE=archlinux-base_20170704-1_amd64.tar.gz
+    #   https://forum.proxmox.com/threads/lxc-create-template-from-existing-container.24239/
+    # For Arch linux:
+    #   1. Login via pct enter isntead of ssh
+    #   2. Remove all contents of ~/.ssh folder
+    #   3. Clear pacman cache with yaourt -Scc
+    #   4. Exit and shutdown the container
+    #   5. Remove Network interface via proxmox web GUI
+    #   6. Create a backup (not snapshot!)
+    #   7. Copy backup from /var/lib/vz/dump to /var/lib/vz/template/cache
+    #   8. Rename file to better template name.
+    TEMPLATE=archlinux_custombase_4-24-2018.tar.lzo
+    #TEMPLATE=archlinux-base_20170704-1_amd64.tar.gz
     #TEMPLATE=archlinux_bootstrapped_11-14-2017.tar.gz
     pct create $VMID /var/lib/vz/template/cache/$TEMPLATE -ssh-public-keys /tmp/id_rsa.pub -storage local-zfs -net0 name=eth0,bridge=vmbr0,ip=dhcp,ip6=dhcp -ostype archlinux > /dev/null
 
