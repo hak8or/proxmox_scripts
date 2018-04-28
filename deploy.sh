@@ -20,14 +20,15 @@ fi
 echo "====== $TITLE ======"
 
 # IP address of the Proxmox host
-PROXMOX_IP_ADDR=192.168.1.224
+PROXMOX_IP_ADDR=192.168.1.2
+PROXMOX_PORT=2221
 if [[ -z $PROXMOX_IP_ADDR ]]; then
     echo "$TAGSTR PROXMOX_IP_ADDR was not set!"
     exit
 fi
 
 # Verify we can talk to the proxmox host.
-REPLYFROMSERVER=$(ssh root@$PROXMOX_IP_ADDR $"echo "Hello World"")
+REPLYFROMSERVER=$(ssh root@$PROXMOX_IP_ADDR -p $PROXMOX_PORT  $"echo "Hello World"")
 if [[ $REPLYFROMSERVER != "Hello World" ]]; then
     echo "$TAGSTR Failed to verify SSH connectivty with proxmox host."
     exit
@@ -36,11 +37,11 @@ fi
 # Retrieve the IP address of a container as IPv4,IPv6. Arg1 is the container ID.
 FN_get_IPaddr (){
     # IPv6 address fetch
-    IPv6ADDR=$(ssh root@$PROXMOX_IP_ADDR "pct exec $1 ip addr show eth0 | grep /128 | grep -v fd75")
+    IPv6ADDR=$(ssh root@$PROXMOX_IP_ADDR -p $PROXMOX_PORT "pct exec $1 ip addr show eth0 | grep /128 | grep -v fd75")
     IPv6ADDR=$(echo $IPv6ADDR | awk '{a=$2; split(a, b, "/"); print b[1]}')
 
     # IPv4 address fetch
-    IPv4ADDR=$(ssh root@$PROXMOX_IP_ADDR "pct exec $1 ip addr show eth0 | grep inet")
+    IPv4ADDR=$(ssh root@$PROXMOX_IP_ADDR -p $PROXMOX_PORT "pct exec $1 ip addr show eth0 | grep inet")
     IPv4ADDR=$(echo $IPv4ADDR | awk '{a=$2; split(a, b, "/"); print b[1]}')
 }
 
@@ -53,9 +54,9 @@ FN_get_IPaddr (){
 # Run script over SSH instead of using this when possible. For example:
 # ssh root@$IPv6ADDR 'bash -s' < somescript.sh
 FN_exec_script_proxy_container(){
-    scp $2 root@$PROXMOX_IP_ADDR:/tmp/$2 > /dev/null
+    scp -P $PROXMOX_PORT $2 root@$PROXMOX_IP_ADDR:/tmp/$2 > /dev/null
 
-    ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<- AcRP030Cclfad6
+    ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR /usr/bin/env bash <<- AcRP030Cclfad6
         pct push $1 /tmp/$2 /tmp/$2 > /dev/null
         pct exec $1 chmod +x /tmp/$2
         pct exec $1 /tmp/$2
@@ -108,19 +109,19 @@ if [[ $1 == "-ID" ]]; then
         fi
 
         # Check if the snapshot exists on proxmox for this VMID.
-        SNAPSHOT_LIST=$(ssh root@$PROXMOX_IP_ADDR "pct listsnapshot $2")
+        SNAPSHOT_LIST=$(ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR "pct listsnapshot $2")
         SNAPSHOT_LIST=$(echo "$SNAPSHOT_LIST" | awk '{print $1}' | grep $4)
         if [[ -z $SNAPSHOT_LIST ]]; then
             # Create a snapshot with this name.
             echo "$TAGSTR Creating a snapshot called $4 for VMID $2!"
-            ssh root@$PROXMOX_IP_ADDR "pct snapshot $2 $4"
+            ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR "pct snapshot $2 $4"
         else
             # Restore to the snapshot
             echo "$TAGSTR Rollbacking VMID $2 to snapshot $4!"
-            ssh root@$PROXMOX_IP_ADDR "pct rollback $2 $4"
+            ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR "pct rollback $2 $4"
 
             echo "$TAGSTR Starting VMID $2!"
-            ssh root@$PROXMOX_IP_ADDR "pct start $2"
+            ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR "pct start $2"
         fi
         echo "$TAGSTR $IPv4ADDR, $IPv6ADDR"
         exit
@@ -145,12 +146,12 @@ if [[ $1 == "-ID" ]]; then
 fi
 
 # Make sure SSH public key is in proxmox host. This overwrites if it exists.
-scp $HOME/.ssh/id_rsa.pub root@$PROXMOX_IP_ADDR:/tmp/id_rsa.pub > /dev/null
+scp -P $PROXMOX_PORT $HOME/.ssh/id_rsa.pub root@$PROXMOX_IP_ADDR:/tmp/id_rsa.pub > /dev/null
 
 # No specific container was provided, so we create one.
 # Can pass small script like this: https://stackoverflow.com/a/3872762/516959
 echo "$TAGSTR Creating container"
-VMID=$(ssh root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030CAlfad6'
+VMID=$(ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030CAlfad6'
     # use the highest VMID+1 as our new VMID. This returns 1 if no VMID's exist.
     VMID=$(pct list | awk 'NR > 1 {print $1}' | sort -nr | head -n1)
     VMID=$(($VMID + 1))
