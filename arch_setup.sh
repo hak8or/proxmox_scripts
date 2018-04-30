@@ -60,8 +60,8 @@ echo "$TAGSTR Updating all packages as needed"
 pacman -Syu --noconfirm > $LOGFILE 2>&1
 
 # Do an update and install some packages.
-echo "$TAGSTR Installing base-devel, git, htop, vim, rsync, go, dotnet-sdk, and cowsay"
-pacman -Syu base-devel git htop vim cowsay rsync go dotnet-sdk --noconfirm --needed > $LOGFILE 2>&1
+echo "$TAGSTR Installing base-devel, git, htop, vim, rsync, go, dotnet-sdk, wget, tmux, and cowsay"
+pacman -Syu base-devel git htop vim cowsay rsync go dotnet-sdk wget tmux --noconfirm --needed > $LOGFILE 2>&1
 
 # Change locale to EN US UTF-8
 echo "$TAGSTR Changing locale to EN US UTF-8"
