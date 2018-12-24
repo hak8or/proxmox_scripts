@@ -61,7 +61,7 @@ pacman -Syu --noconfirm >> $LOGFILE 2>&1
 
 # Do an update and install some packages.
 echo "$TAGSTR Installing base-devel, git, htop, vim, rsync, go, dotnet-sdk, wget, tmux, and cowsay"
-pacman -Syu base-devel git htop vim cowsay rsync go dotnet-sdk wget tmux --noconfirm --needed >> $LOGFILE 2>&1
+pacman -S base-devel git htop vim cowsay rsync go dotnet-sdk wget tmux --noconfirm --needed >> $LOGFILE 2>&1
 
 # Change locale to EN US UTF-8
 echo "$TAGSTR Changing locale to EN US UTF-8"
@@ -75,7 +75,7 @@ export LANG=en_US.UTF-8
 # itself to be ran as root, even though all we have is root in the container,
 # and I don't want to bother fiddling with users just for this. Yay on the
 # other hand works fine for this.
-if ! type yaourt &> /dev/null; then
+if ! [ -x "$(command -v yay)" ]; then
 	# Disable root check for makepkg since we are using root for everything.
 	# Replace the "if (( EUID == 0 )); then" with "if (( 0 )); then" to force root
 	# check to always fail.
@@ -85,17 +85,19 @@ if ! type yaourt &> /dev/null; then
 	mkdir ~/tmp
 	cd ~/tmp
 	# ----------- package query for yay -----------
-	git clone https://aur.archlinux.org/package-query.git  >> $LOGFILE 2>&1
+	echo "$TAGSTR Installing package-query" >> $LOGFILE 
+	git clone https://aur.archlinux.org/package-query.git >> $LOGFILE 2>&1
 	cd package-query
 	makepkg -si --noconfirm  >> $LOGFILE 2>&1
-	cd ..
+	cd ~/tmp
 	# ----------- yay itself -----------
+	echo "$TAGSTR Installing yay" >> $LOGFILE 
 	git clone https://aur.archlinux.org/yay.git >> $LOGFILE 2>&1
 	cd yay
 	makepkg -si --noconfirm >> $LOGFILE 2>&1
-	cd ..
+
 	# Wipe tmp dir
-	cd ..
+	cd ~
 	rm -r -f ~/tmp
 fi
 
@@ -106,3 +108,4 @@ ipv4addr=$(ip addr show dev eth0 | grep "inet 10" | awk '{a=$2; split(a, b, "/")
 
 # Lastly, say we are done.
 echo "$TAGSTR Completed $TITLE"
+echo "$TAGSTR Completed $TITLE" >> $LOGFILE 
