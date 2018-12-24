@@ -20,7 +20,7 @@ fi
 echo "====== $TITLE ======"
 
 # IP address of the Proxmox host
-PROXMOX_IP_ADDR=192.168.1.2
+PROXMOX_IP_ADDR=10.10.10.200
 PROXMOX_PORT=2221
 if [[ -z $PROXMOX_IP_ADDR ]]; then
     echo "$TAGSTR PROXMOX_IP_ADDR was not set!"
@@ -36,12 +36,12 @@ fi
 
 # Retrieve the IP address of a container as IPv4,IPv6. Arg1 is the container ID.
 FN_get_IPaddr (){
-    # IPv6 address fetch
-    IPv6ADDR=$(ssh root@$PROXMOX_IP_ADDR -p $PROXMOX_PORT "pct exec $1 ip addr show eth0 | grep /128 | grep -v fd75")
+    # IPv6 address fetch. We can't use the -4 or -6 flags because escaping turns into a nightmare.
+    IPv6ADDR=$(ssh root@$PROXMOX_IP_ADDR -p $PROXMOX_PORT "pct exec $1 ip addr show dev eth0 | grep \"inet6 fe80\"")
     IPv6ADDR=$(echo $IPv6ADDR | awk '{a=$2; split(a, b, "/"); print b[1]}')
 
     # IPv4 address fetch
-    IPv4ADDR=$(ssh root@$PROXMOX_IP_ADDR -p $PROXMOX_PORT "pct exec $1 ip addr show eth0 | grep inet")
+    IPv4ADDR=$(ssh root@$PROXMOX_IP_ADDR -p $PROXMOX_PORT "pct exec $1 ip addr show dev eth0 | grep \"inet 10\"")
     IPv4ADDR=$(echo $IPv4ADDR | awk '{a=$2; split(a, b, "/"); print b[1]}')
 }
 
@@ -162,6 +162,12 @@ VMID=$(ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030C
         VMID=100
     fi
 
+    # Get the IP Addresses
+    CTIP=10.10.10.$(($VMID + 100))/24
+    CTGW=10.10.10.1
+    CTIPv6=2001:470:8a74::$(($VMID + 100))/64
+    CTGWv6=2001:470:8a74::1
+
     # Create a new container with the VMID
     # Use Below to create a new container template. Can also right click in proxmox GUI
     # but that does not handle clearing pacman cache, etc.
@@ -170,7 +176,7 @@ VMID=$(ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030C
     # For Arch linux:
     #   1. Login via pct enter isntead of ssh
     #   2. Remove all contents of ~/.ssh folder
-    #   3. Clear pacman cache with yaourt -Scc
+    #   3. Clear pacman cache with yay -Scc
     #   4. Exit and shutdown the container
     #   5. Remove Network interface via proxmox web GUI
     #   6. Create a backup (not snapshot!)
@@ -179,7 +185,7 @@ VMID=$(ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030C
     TEMPLATE=archlinux_custombase_4-24-2018.tar.lzo
     #TEMPLATE=archlinux-base_20170704-1_amd64.tar.gz
     #TEMPLATE=archlinux_bootstrapped_11-14-2017.tar.gz
-    pct create $VMID /var/lib/vz/template/cache/$TEMPLATE -ssh-public-keys /tmp/id_rsa.pub -storage local-zfs -net0 name=eth0,bridge=vmbr0,ip=dhcp,ip6=dhcp -ostype archlinux > /dev/null
+    pct create $VMID /var/lib/vz/template/cache/$TEMPLATE -ssh-public-keys /tmp/id_rsa.pub -storage local-zfs -net0 name=eth0,bridge=vmbr2004,ip=$CTIP,gw=$CTGW,ip6=$CTIPv6,gw6=$CTGWv6, -ostype archlinux > /dev/null
 
     # Start the container.
     pct start $VMID > /dev/null
@@ -200,6 +206,7 @@ FN_get_IPaddr $VMID
 
 # Wipe the fingerprint of the host in case it was used earlier.
 ssh-keygen -R $IPv6ADDR > /dev/null
+ssh-keygen -R $IPv4ADDR > /dev/null
 
 # Run any potential secondary script.
 if [[ -n $1 ]]; then
