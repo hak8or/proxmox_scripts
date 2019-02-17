@@ -182,7 +182,8 @@ VMID=$(ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030C
     #   6. Create a backup (not snapshot!)
     #   7. Copy backup from /var/lib/vz/dump to /var/lib/vz/template/cache
     #   8. Rename file to better template name.
-    TEMPLATE=archlinux_custombase_4-24-2018.tar.lzo
+    TEMPLATE=archlinux_custombase_2-16-2019.tar.lzo
+    #TEMPLATE=archlinux_custombase_4-24-2018.tar.lzo
     #TEMPLATE=archlinux-base_20170704-1_amd64.tar.gz
     #TEMPLATE=archlinux_bootstrapped_11-14-2017.tar.gz
     pct create $VMID /var/lib/vz/template/cache/$TEMPLATE -ssh-public-keys /tmp/id_rsa.pub -storage local-zfs -net0 name=eth0,bridge=vmbr2004,ip=$CTIP,gw=$CTGW,ip6=$CTIPv6,gw6=$CTGWv6, -ostype archlinux > /dev/null
