@@ -57,11 +57,11 @@ EOM05594313219813
 
 # Update as needed.
 echo "$TAGSTR Updating all packages as needed"
-pacman -Syu --noconfirm >> $LOGFILE 2>&1
+pacman -Syu --noconfirm --noprogressbar --needed >> $LOGFILE 2>&1
 
 # Do an update and install some packages.
-echo "$TAGSTR Installing base-devel, git, htop, vim, rsync, go, dotnet-sdk, wget, tmux, and cowsay"
-pacman -S base-devel git htop vim cowsay rsync go dotnet-sdk wget tmux --noconfirm --needed >> $LOGFILE 2>&1
+echo "$TAGSTR Installing base-devel, git, htop, vim, rsync, go, dotnet-sdk, wget, tmux, fish, and cowsay"
+pacman -S base-devel git htop vim cowsay rsync go dotnet-sdk wget fish tmux --noconfirm --noprogressbar --needed >> $LOGFILE 2>&1
 
 # Change locale to EN US UTF-8
 echo "$TAGSTR Changing locale to EN US UTF-8"
@@ -70,6 +70,10 @@ sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen >> $LOGFILE 2>&
 locale-gen >> $LOGFILE 2>&1
 echo LANG=en_US.UTF-8 > /etc/locale.conf >> $LOGFILE 2>&1
 export LANG=en_US.UTF-8
+
+# Change our shell to fish
+echo "$TAGSTR Changing shell to fish"
+chsh -s /usr/bin/fish  >> $LOGFILE 2>&1
 
 # Install yay. Why yay instead of pacaur? Because pacaur doesn't allow
 # itself to be ran as root, even though all we have is root in the container,

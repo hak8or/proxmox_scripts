@@ -174,7 +174,7 @@ VMID=$(ssh -p $PROXMOX_PORT root@$PROXMOX_IP_ADDR /usr/bin/env bash <<-'AcRP030C
     #   https://forum.proxmox.com/threads/customize-a-lxc-template.23461/
     #   https://forum.proxmox.com/threads/lxc-create-template-from-existing-container.24239/
     # For Arch linux:
-    #   1. Login via pct enter isntead of ssh
+    #   1. Login via pct enter instead of ssh
     #   2. Remove all contents of ~/.ssh folder
     #   3. Clear pacman cache with yay -Scc
     #   4. Exit and shutdown the container
