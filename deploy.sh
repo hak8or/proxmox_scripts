@@ -5,6 +5,19 @@
 # You should have cowsay installed because it's awesome!
 ##########################
 
+# This will not work currently because of a bug somewhere along apparmour,
+# lxd, lcx, or systemd. Seems most of the blame is on apparmour who refuse
+# to do anything about it. Until that is fixed, this script will not work,
+# so say so instead of realizing the issue, forgetting about it after a few
+# weeks, then spending another few hours wondering what the hell is going
+# on, and then finding my original post on launchpad.
+#
+# If this is bypassed, you will get a container which when booting will
+# not have any network interface.
+echo " !!!!! THIS DOES NOT WORK WITH NEW PROXMOX !!!!!"
+echo "   Check out hak8or post on https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/1811248"
+exit
+
 # Header for this script
 TITLE="Deployment_Script"
 DEPTH=0
